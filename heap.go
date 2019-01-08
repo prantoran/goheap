@@ -2,6 +2,7 @@ package goheap
 
 import (
 	"errors"
+	"sync"
 )
 
 type heapItem struct {
@@ -14,6 +15,8 @@ type minHeap struct {
 	itemIndex     map[int]int
 	vis           []bool
 	cap, heapSize int
+
+	mu sync.Mutex
 }
 
 // p = parent
@@ -58,6 +61,9 @@ func (h *minHeap) updateW(i int, newWeight float64) {
 
 func (h *minHeap) Insert(id int, weight float64) error {
 
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if h.updateExisting(id, weight) {
 		return nil
 	}
@@ -90,6 +96,10 @@ func (h *minHeap) deleteItemIndex(id int) {
 }
 
 func (h *minHeap) ExtractMin() (id int, weight float64, err error) {
+
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	if h.heapSize <= 0 {
 		return 0, 0, errors.New("no item in heap")
 	}
@@ -150,11 +160,13 @@ func (h *minHeap) minHeapify(i int) {
 	}
 }
 
+// NewMinHeap returns a new instance of MinHeap
 func NewMinHeap(cap int) MinHeap {
 	return &minHeap{
 		cap:       cap,
 		items:     make([]heapItem, cap),
 		vis:       make([]bool, cap),
 		itemIndex: map[int]int{},
+		mu:        sync.Mutex{},
 	}
 }
