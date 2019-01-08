@@ -8,7 +8,7 @@
         - Insert the previously inserted key with lower weight
 
 
-### How to use `MinHeap`:
+### How to use `GoHeap`:
 
 * First create a new instance:
 ```
